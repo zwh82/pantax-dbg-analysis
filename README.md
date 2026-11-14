@@ -254,18 +254,22 @@ full output list.
 
 ## Hadza season runs
 
-`config/hadza.tsv` holds two runs that share the same updated abundance and
-count matrices (`/snode_data/jialu/hazha/...`) but use different season
-metadata:
+`config/hadza.tsv` holds two runs that share the same updated 179-sample
+abundance and count matrices (`/snode_data/jialu/hazha/...`) but use different
+season metadata. The matrices add 37 samples and 69 species to the earlier
+142-sample release; both metadata tables cover all 179 samples, so none are
+dropped by the sample intersection.
 
-| Cohort directory | Disease label | Groups |
+| Cohort directory | Disease label | Groups (n) |
 |---|---|---|
-| `Hadza_five_timepoints` | `2014-LW` | Control (`2014-EW`), `2014-LW`, `2013-LD`, `2014-ED`, `2014-LD` |
-| `Hadza_three_timepoints` | `Dry2013` | Control (`Wet2014`), `Dry2013`, `Dry2014` |
+| `Hadza_five_timepoints` | `2014-LW` | Control/`2014-EW` (52), `2014-LW` (5), `2013-LD` (17), `2014-ED` (24), `2014-LD` (81) |
+| `Hadza_three_timepoints` | `Dry2013` | Control/`Wet2014` (57), `Dry2013` (17), `Dry2014` (105) |
 
 The pipeline requires a `Control` group; in these non-disease data it is a
 code alias for the first season. Metadata files are
-`config/hadza_metadata_five.tsv` and `config/hadza_metadata_three.tsv`.
+`config/hadza_metadata_five.tsv` and `config/hadza_metadata_three.tsv`;
+`config/build_hadza_metadata.R` rebuilds them from the 179-sample
+`sample_manifest.tsv` and the matrix sample order.
 
 ```bash
 ./run.sh hadza

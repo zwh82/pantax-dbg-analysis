@@ -235,17 +235,20 @@ results/core_species/
 
 ## Hadza 季节网络
 
-`config/hadza.tsv` 包含两套运行，共用同一份更新后的丰度矩阵和 count 矩阵
-（`/snode_data/jialu/hazha/...`），但使用不同的季节元数据：
+`config/hadza.tsv` 包含两套运行，共用同一份更新后的 179 样本丰度矩阵和 count
+矩阵（`/snode_data/jialu/hazha/...`），但使用不同的季节元数据。矩阵比早先的
+142 样本版本新增 37 个样本和 69 个物种；两份元数据都覆盖全部 179 个样本，
+不会在样本取交集时被丢弃。
 
-| 队列目录 | disease 标签 | 分组 |
+| 队列目录 | disease 标签 | 分组（样本数） |
 |---|---|---|
-| `Hadza_five_timepoints` | `2014-LW` | Control（`2014-EW`）、`2014-LW`、`2013-LD`、`2014-ED`、`2014-LD` |
-| `Hadza_three_timepoints` | `Dry2013` | Control（`Wet2014`）、`Dry2013`、`Dry2014` |
+| `Hadza_five_timepoints` | `2014-LW` | Control/`2014-EW`（52）、`2014-LW`（5）、`2013-LD`（17）、`2014-ED`（24）、`2014-LD`（81） |
+| `Hadza_three_timepoints` | `Dry2013` | Control/`Wet2014`（57）、`Dry2013`（17）、`Dry2014`（105） |
 
 pipeline 要求存在 `Control` 分组；在这些非疾病数据中它只是第一个季节的代码别名。
 元数据文件为 `config/hadza_metadata_five.tsv` 和
-`config/hadza_metadata_three.tsv`。
+`config/hadza_metadata_three.tsv`；`config/build_hadza_metadata.R` 从 179 样本的
+`sample_manifest.tsv` 和矩阵样本顺序重建它们。
 
 ```bash
 ./run.sh hadza
