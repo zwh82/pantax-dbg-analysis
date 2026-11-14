@@ -38,6 +38,42 @@ The script:
 Useful overrides: `NODE_A`, `NODE_B`, `RUN`, `REPO`, `SKIP_ANALYSIS=1`,
 `SKIP_CORE=1`, `SKIP_HADZA=1`, `DRY_RUN=1`, `SNAPSHOT_ONLY=1`.
 
+## Launchers and `run_recorded`
+
+The script does not rebuild the `Rscript` command for every step. Each step is
+saved as a launcher under `<run>/control/launchers/`:
+
+```text
+control/launchers/
+  w01_node001.sh ... w12_node003.sh   cohort shards
+  e13_eras.sh                         ERAS shard
+  analysis.sh                         downstream analysis
+  core_network.sh                     20 core-species Control networks
+  core_species.sh                     core-species tables/figures/summary
+  hadza.sh                            Hadza season networks
+```
+
+A launcher contains the exact `cd`, environment variables, input/output paths
+and `Rscript` arguments used for that step. It writes its status to
+`control/status/<name>.state` and its exit code to
+`control/status/<name>.exit`; stdout/stderr go to
+`control/logs/<name>.log`.
+
+`run_recorded <name> <timeout-seconds>` launches
+`control/launchers/<name>.sh` on `NODE_A`, records the PID, polls for
+`<name>.exit` every 20 s, and fails the whole run if the step exits non-zero or
+exceeds the timeout.
+
+| Call | Launcher | Timeout |
+|---|---|---:|
+| `run_recorded core_network 7200` | `core_network.sh` | 2 h |
+| `run_recorded core_species 21600` | `core_species.sh` | 6 h |
+| `run_recorded hadza 21600` | `hadza.sh` | 6 h |
+
+The 13 cohort shards use the same launcher pattern through `launch_worker`;
+`analysis.sh` is launched by the older `run_analysis` helper, which waits the
+same way.
+
 For this run the snapshot is:
 
 ```text

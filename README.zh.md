@@ -233,6 +233,32 @@ results/core_species/
 和 consensus hub 阈值在 `core_species/config/core_species.yaml` 中配置。
 定义与完整输出列表见 [`core_species/README.md`](core_species/README.md)。
 
+## Hadza 季节网络
+
+`config/hadza.tsv` 包含两套运行，共用同一份更新后的丰度矩阵和 count 矩阵
+（`/snode_data/jialu/hazha/...`），但使用不同的季节元数据：
+
+| 队列目录 | disease 标签 | 分组 |
+|---|---|---|
+| `Hadza_five_timepoints` | `2014-LW` | Control（`2014-EW`）、`2014-LW`、`2013-LD`、`2014-ED`、`2014-LD` |
+| `Hadza_three_timepoints` | `Dry2013` | Control（`Wet2014`）、`Dry2013`、`Dry2014` |
+
+pipeline 要求存在 `Control` 分组；在这些非疾病数据中它只是第一个季节的代码别名。
+元数据文件为 `config/hadza_metadata_five.tsv` 和
+`config/hadza_metadata_three.tsv`。
+
+```bash
+./run.sh hadza
+# 或
+Rscript run_pipeline.R --config config/hadza.yaml \
+  --cohorts config/hadza.tsv --outdir results/hadza
+```
+
+输出写到 `<outdir>/Hadza_five_timepoints/res_rc/` 和
+`<outdir>/Hadza_three_timepoints/res_rc/`，默认后缀 `res_rc`。正式运行写入
+`pantax-dbg-analysis_results_20261114/hadza/`；`reproduce.sh` 的最后一步也会
+执行同一个启动脚本。
+
 ## 复现已发表运行
 
 复现配方和代码快照位于 `reproduction/`。2026-11-14 的完整运行见

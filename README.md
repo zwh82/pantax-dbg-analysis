@@ -252,6 +252,34 @@ Permutation counts, seed and consensus-hub thresholds are configurable in
 [`core_species/README.md`](core_species/README.md) for definitions and the
 full output list.
 
+## Hadza season runs
+
+`config/hadza.tsv` holds two runs that share the same updated abundance and
+count matrices (`/snode_data/jialu/hazha/...`) but use different season
+metadata:
+
+| Cohort directory | Disease label | Groups |
+|---|---|---|
+| `Hadza_five_timepoints` | `2014-LW` | Control (`2014-EW`), `2014-LW`, `2013-LD`, `2014-ED`, `2014-LD` |
+| `Hadza_three_timepoints` | `Dry2013` | Control (`Wet2014`), `Dry2013`, `Dry2014` |
+
+The pipeline requires a `Control` group; in these non-disease data it is a
+code alias for the first season. Metadata files are
+`config/hadza_metadata_five.tsv` and `config/hadza_metadata_three.tsv`.
+
+```bash
+./run.sh hadza
+# or
+Rscript run_pipeline.R --config config/hadza.yaml \
+  --cohorts config/hadza.tsv --outdir results/hadza
+```
+
+Outputs go to `<outdir>/Hadza_five_timepoints/res_rc/` and
+`<outdir>/Hadza_three_timepoints/res_rc/` with the default `res_rc` suffix.
+The canonical run writes them to
+`pantax-dbg-analysis_results_20261114/hadza/`; `reproduce.sh` runs the same
+launcher as its final step.
+
 ## Reproducing a published run
 
 Recorded recipes and snapshots live under `reproduction/`. The 2026-11-14 full
