@@ -19,7 +19,9 @@
 #   filter_conf    read counts + SPIEC-EASI + confidence >= 0.8   -> res_raclr_econ_filter
 #   merged         merged-cohort table (set MERGED_TABLE)         -> res_rc
 #   network_only   build Control networks only                    -> all_country/
+#   core_network   core-species Control networks per country      -> all_country_core/
 #   analysis       downstream tables and figures on a result tree
+#   core_species   core-species role analysis, figures, summary
 #   full           both cohort tables into one tree, then analysis
 #
 # Every scenario writes under $OUT_ROOT (default: ./runs), never into the
@@ -28,12 +30,15 @@
 # Useful environment variables:
 #   OUT_ROOT=/path            root for all scenario outputs
 #   COHORTS=/path             non-ERAS cohort table
+#   CORE_COHORTS=/path        core-species country table
 #   ERAS_COHORTS=/path        ERAS cohort table
 #   MERGED_TABLE=/path        merged-cohort table
 #   ANALYSIS_RESULTS=/path    analysis output root (default <OUT_ROOT>/full/analysis)
 #   ANALYSIS_NETWORK=/path    cohort network root (default <OUT_ROOT>/full/network)
 #   ANALYSIS_SUFFIX=res_rc    suffix to analyse
 #   ANALYSIS_STEP=all|net_compare,rho,...  steps for the analysis scenario
+#   CORE_NETWORK=/path        network root for the core-species analysis
+#   CORE_STEP=all             analysis, figures, manuscript (comma-separated)
 #   DRY_RUN=1                 print the commands without running them
 #
 # Examples:
@@ -55,12 +60,15 @@ export R_LIBS=${R_LIBS:-/home/wenhai/miniconda3/envs/r_4.3/lib/R/library:/home/w
 
 OUT_ROOT=${OUT_ROOT:-$ROOT/runs}
 COHORTS=${COHORTS:-$ROOT/config/cohorts.tsv}
+CORE_COHORTS=${CORE_COHORTS:-$ROOT/config/cohorts_core.tsv}
 ERAS_COHORTS=${ERAS_COHORTS:-$ROOT/config/eras.tsv}
 MERGED_TABLE=${MERGED_TABLE:-$SRC/scripts/merged_network_metadata.tsv}
 ANALYSIS_RESULTS=${ANALYSIS_RESULTS:-$OUT_ROOT/full/analysis}
 ANALYSIS_NETWORK=${ANALYSIS_NETWORK:-$OUT_ROOT/full/network}
 ANALYSIS_SUFFIX=${ANALYSIS_SUFFIX:-res_rc}
 ANALYSIS_STEP=${ANALYSIS_STEP:-all}
+CORE_NETWORK=${CORE_NETWORK:-$OUT_ROOT/full/network}
+CORE_STEP=${CORE_STEP:-all}
 DRY_RUN=${DRY_RUN:-0}
 
 usage() {
@@ -141,6 +149,33 @@ prepare_analysis_root() {
   if [ ! -f "$outdir/scripts/disease_name_mapping.tsv" ]; then
     cp "$SRC/scripts/disease_name_mapping.tsv" "$outdir/scripts/"
   fi
+}
+
+# Core-species analysis reads networks and writes tables/figures/summary under
+# $OUT_ROOT/core_species/.  The effective config is saved next to the results.
+run_core_species_to() {
+  local outdir=$1
+  shift
+  ensure_dirs
+  local log_file="$OUT_ROOT/logs/core_species.log"
+  local -a cmd=(
+    "$R" "$ROOT/core_species/run_core_species.R"
+    --base-dir "$CORE_NETWORK"
+    --outdir "$outdir/analysis"
+    --figure-dir "$outdir/analysis/figures"
+    --manuscript-dir "$outdir/analysis/manuscript_stats"
+    --step "$CORE_STEP"
+    --save-config "$outdir/analysis/configs/core_species.yaml"
+    "$@"
+  )
+  if [ "$DRY_RUN" != "1" ]; then
+    mkdir -p "$outdir/analysis/configs"
+  fi
+  printf '+ '; printf '%q ' "${cmd[@]}"; printf '\n'
+  if [ "$DRY_RUN" = "1" ]; then
+    return 0
+  fi
+  "${cmd[@]}" 2>&1 | tee "$log_file"
 }
 
 case "$scenario" in
@@ -245,6 +280,24 @@ case "$scenario" in
       --prevalence 0.1 \
       --network-only TRUE \
       "$@"
+    ;;
+
+  # ---- core-species Control networks only --------------------------------
+  core_network)
+    run_pipeline_to core_network "$OUT_ROOT/core_network/network" \
+      --config "$ROOT/config/core_network.yaml" \
+      --cohorts "$CORE_COHORTS" \
+      "$@"
+    ;;
+
+  # ---- core-species role analysis on an existing network tree ------------
+  core_species)
+    if [ "$DRY_RUN" != "1" ] && [ ! -d "$CORE_NETWORK" ]; then
+      echo "Network root not found: $CORE_NETWORK" >&2
+      echo "Run ./run.sh full first, or set CORE_NETWORK=/path/to/network" >&2
+      exit 1
+    fi
+    run_core_species_to "$OUT_ROOT/core_species" "$@"
     ;;
 
   # ---- downstream analysis on an existing result tree --------------------

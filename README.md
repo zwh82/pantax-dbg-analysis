@@ -8,7 +8,9 @@ Analysis workflows for profiling data produced by `pantax-dbg`. The repository
 builds microbial co-occurrence networks for 74 gut microbiome cohorts
 (73 disease/control cohorts plus the ERAS antibiotic time course), then runs
 downstream analyses of network stability, edge retention, hub species, rare vs
-abundant taxa, and ERAS recovery.
+abundant taxa, and ERAS recovery. It also builds Control-only core-species
+networks for 20 countries and analyses the role of globally defined core
+species across all cohorts.
 
 ## What it does
 
@@ -17,9 +19,14 @@ abundant taxa, and ERAS recovery.
   weight/confidence filters, and merged-cohort input.
 - Produces per-cohort network objects, node tables, centrality metrics, edge
   statistics and abundance-class plots.
+- Builds one Control-only network per country from the core-species matrices
+  (`config/cohorts_core.tsv`).
 - Runs cross-cohort analyses: stability vs sample size, node overlap, degree
   change, edge preservation/loss, rho comparisons, consensus hubs and the
   final multi-panel figures.
+- Analyses core-species roles across all networks: healthy edge enrichment,
+  disease edge loss, targeted-removal robustness, core rare composition of
+  abundant-rare edges, and ERAS antibiotic recovery.
 - Handles the ERAS time course (D0/D4/D8/D42/D180) with D0 relabelled as
   Control.
 
@@ -53,6 +60,7 @@ run.sh                ready-to-run scenarios and output layout
 R/                    network construction and per-cohort workflow
 config/               default configs, cohort tables and ERAS metadata
 analysis/             downstream analysis and figure entry point
+core_species/         core-species Control networks and role analysis
 verification/         developer checks for the refactored code
 reproduction/         recorded recipes and code snapshots for published runs
 archive/              refactor-era documentation
@@ -106,6 +114,18 @@ Rscript analysis/run_analysis.R \
   --step all
 ```
 
+Build the core-species Control networks and analyse core-species roles:
+
+```bash
+Rscript run_pipeline.R \
+  --config config/core_network.yaml \
+  --outdir results
+
+Rscript core_species/run_core_species.R \
+  --base-dir results/network \
+  --step all
+```
+
 Run one cohort while debugging:
 
 ```bash
@@ -121,6 +141,8 @@ The equivalent one-command recipes are in `run.sh`:
 ```bash
 ./run.sh spiec_rc          # read counts + SPIEC-EASI + 10% prevalence
 ./run.sh eras              # ERAS time course
+./run.sh core_network      # 20 Control-only core-species networks
+./run.sh core_species      # core-species tables, figures and summary
 ./run.sh full              # 73 cohorts + ERAS, then all analysis steps
 ./run.sh analysis          # analysis on an existing result tree
 DRY_RUN=1 ./run.sh full    # print commands only
@@ -151,7 +173,11 @@ nested fields:
 
 Use `--print-config` to inspect the effective config without running, and
 `--save-config FILE` to write it (YAML or R format, chosen by extension) before
-continuing. The ERAS run uses `config/eras.yaml` and `config/eras.tsv`.
+continuing. The ERAS run uses `config/eras.yaml` and `config/eras.tsv`. The
+core-species Control networks use `config/core_network.yaml` with
+`config/cohorts_core.tsv` and write to `<outdir>/all_country_core/`; the
+core-species analysis has its own config at
+`core_species/config/core_species.yaml` (see `core_species/README.md`).
 
 ## Output layout
 
@@ -197,6 +223,27 @@ final       combined main figure and split panels
 summary table (`--input`/`--outdir`). `--network-dir` and `--results` may point
 at the same tree for the legacy layout, or at separate network/analysis roots
 as shown above.
+
+## Core-species analysis
+
+`core_species/run_core_species.R` reads the same `PR*/res_rc` network objects
+and writes:
+
+```text
+results/core_species/
+  qc/ tables/ plot_data/          analysis tables
+  figures/                        main and supplementary figures
+  manuscript_stats/               summary tables and markdown
+```
+
+It uses fixed global core lists (143 rare, 35 abundant in
+`core_species/data/`), keeps each network's local abundance class, and
+requires a preserved edge to retain both endpoints and their abundance
+classes. `--step` accepts `analysis`, `figures`, `manuscript` or `all`.
+Permutation counts, seed and consensus-hub thresholds are configurable in
+`core_species/config/core_species.yaml`. See
+[`core_species/README.md`](core_species/README.md) for definitions and the
+full output list.
 
 ## Reproducing a published run
 

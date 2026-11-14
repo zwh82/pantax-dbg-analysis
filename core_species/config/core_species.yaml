@@ -1,0 +1,39 @@
+# Core-species network analysis configuration.
+#
+# Paths are resolved against the repository root, so the recipe works from any
+# working directory.  Command-line flags override these values; nested fields
+# can be changed with --set, e.g.
+#   --set analysis/n_perm=50
+
+# ---- input ---------------------------------------------------------------
+# Directory holding PR*/res_rc/g_*_full_network.rds (one directory per cohort).
+network_dir: results/network
+core_rare: core_species/data/core_rare_species.tsv
+core_abundant: core_species/data/core_abundant_species.tsv
+
+# ---- steps ---------------------------------------------------------------
+# analysis: tables; figures: main + supplementary figures; manuscript:
+# summary tables and markdown.  "all" runs the three in this order.
+step: analysis
+
+# ---- analysis ------------------------------------------------------------
+analysis:
+  n_perm: 1000          # stratified label permutations per network
+  n_attack_perm: 100    # random-removal permutations for targeted attack
+  seed: 123
+  consensus_hub:
+    top_percent: 0.10   # metric top fraction for one vote
+    min_degree: 3
+    vote_thresh: 3      # votes needed among 5 centrality metrics
+
+# ---- output --------------------------------------------------------------
+output:
+  results: results/core_species
+  figures: results/core_species/figures
+  manuscript: results/core_species/manuscript_stats
+
+# ---- runtime -------------------------------------------------------------
+runtime:
+  library_paths:
+    - /home/wenhai/miniconda3/envs/r_4.3/lib/R/library
+    - /home/wenhai/application/Qmatey/tools/R

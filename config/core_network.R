@@ -1,0 +1,99 @@
+# Pipeline configuration.
+# NOTE: the default config is config/pipeline.yaml.  This file is kept as an
+# R-format example and is only read when passed explicitly:
+#   Rscript run_pipeline.R --config config/pipeline.R
+# The entry point reads this file with --config (default: config/pipeline.yaml).
+# Legacy switch names from scripts/01_config.R are noted in brackets.
+
+config <- list(
+  # ---- input ---------------------------------------------------------------
+  cohorts_file = "config/cohorts_core.tsv",
+  input = list(
+    merged = FALSE,                  # [is_merge] one merged matrix per disease row
+    data_type = "read_count",        # [is_rc] "read_count" or "relative_abundance"
+    fill_zero_counts = FALSE,        # [is_rc_fill] replace zeros with 1e-8
+    floor = 0,                       # [FilterLow] values below this become 0
+    prevalence = 0.1,                # [PREVALENCE_THRESHOLD]
+    present = 0,                     # [PRESENT_THRESHOLD]
+    skip_prevalence_filter = FALSE   # [Notprefilter]
+  ),
+
+  # ---- network construction ------------------------------------------------
+  network = list(
+    tool = "spiec-easi",             # [net_tool] "spiec-easi", "flashweave", "sparcc"
+    graph_file = NULL,               # [graph_file] read a pre-built GML instead
+    filter_by_weight = FALSE,        # [is_filter] drop |weight| < 0.1
+    filter_by_confidence = FALSE,    # [is_edge_con_filter] keep merge >= 0.8
+    spiec_easi = list(
+      relative_abundance = FALSE,    # [spieceasi_ra] also selects the 4.4 library
+      method = "mb",
+      sel.criterion = "bstars",
+      lambda.min.ratio = 1e-3,
+      nlambda = 200,
+      pulsar_select = TRUE,
+      pulsar = list(
+        thresh = 0.05,
+        subsample.ratio = 0.8,
+        rep.num = 100,
+        seed = 123
+      ),
+      norm.params = list(method = "clr")
+    )
+  ),
+
+  # ---- abundance classification -------------------------------------------
+  abundance = list(
+    thresholds = list(
+      high = 1e-3,
+      low_min = 1e-4,
+      low_max = 1e-3,
+      very_low_min = 1e-5,
+      very_low_max = 1e-4
+    ),
+    colors = c(
+      high = "#E41A1C",
+      low = "#377EB8",
+      very_low = "#4DAF4A",
+      other = "#999999"
+    ),
+    # Keep these in sync when the thresholds above are changed.
+    labels = c(
+      high = "High abundance (>1e-3)",
+      low = "Low abundance (1e-4~1e-3)",
+      very_low = "Very low abundance (1e-5~1e-4)",
+      other = "Other"
+    )
+  ),
+
+  # ---- hub definition ------------------------------------------------------
+  hub = list(top_percent = 0.1, min_degree = 5),
+
+  # ---- output --------------------------------------------------------------
+  output = list(
+    dir = "results/",  # [all_out_dir]
+    suffix = NULL,   # [outdir_last] NULL derives it from the switches above
+    flag = ""        # [outflag]
+  ),
+
+  # ---- run modes -----------------------------------------------------------
+  runs = list(
+    network_only = FALSE,            # [build_net_only] build Control networks only
+    core_network_only = TRUE,       # [build_core_net_only] same, core-species input
+    eras = FALSE,                    # [ERAS] ERAS time ordering; TRUE for the ERAS table
+    prjna398089_ibd_not = TRUE       # [PRJNA398089_IBD_not]
+  ),
+
+  # ---- runtime -------------------------------------------------------------
+  runtime = list(
+    library_paths = c(
+      "/home/wenhai/miniconda3/envs/r_4.3/lib/R/library",
+      "/home/wenhai/application/Qmatey/tools/R"
+    ),
+    # SpiecEasi is loaded from a fixed library, as in the original entry point.
+    spiec_easi_library = list(
+      default = "/home/wenhai/miniconda3/envs/r_4.3/lib/R/library",
+      relative_abundance = "/home/wenhai/R/x86_64-redhat-linux-gnu-library/4.4"
+    ),
+    seed = 123
+  )
+)

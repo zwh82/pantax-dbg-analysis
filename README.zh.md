@@ -6,15 +6,19 @@
 
 基于 `pantax-dbg` 产出的 profiling 数据，构建 74 个肠道菌群队列的微生物共现
 网络（73 个疾病/对照队列 + ERAS 抗生素时间点队列），并分析网络稳定性、边保留、
-hub 物种、稀有/丰富物种以及 ERAS 恢复等。
+hub 物种、稀有/丰富物种以及 ERAS 恢复等。另构建 20 个国家的核心物种健康
+（Control）网络，并分析全球核心物种在各队列网络中的作用。
 
 ## 主要功能
 
 - 使用 SPIEC-EASI（默认）、FlashWeave 或 SparCC 构建分组网络。
 - 支持 read count 与相对丰度输入、流行率过滤、边权重/置信度过滤和合并队列模式。
 - 输出每个队列的网络对象、节点表、中心性指标、边统计和丰度分档图。
+- 使用核心物种矩阵为每个国家构建 Control-only 网络（`config/cohorts_core.tsv`）。
 - 跨队列分析：稳定性 vs 样本量、节点重叠、degree 变化、边保留/丢失、rho 比较、
   consensus hub 和最终多面板图。
+- 核心物种分析：健康网络边富集、疾病边丢失、定向移除稳健性、abundant–rare
+  边中的核心稀有比例，以及 ERAS 抗生素恢复。
 - 处理 ERAS 时间点（D0/D4/D8/D42/D180），其中 D0 重命名为 Control。
 
 ## 环境要求
@@ -46,6 +50,7 @@ run.sh                常用场景和输出布局
 R/                    建网与单队列流程
 config/               默认配置、队列表和 ERAS 元数据
 analysis/             下游分析与绘图入口
+core_species/         核心物种健康网络与作用分析
 verification/         重构代码的开发期对照检查
 reproduction/         已发表运行的复现配方和代码快照
 archive/              重构阶段的旧文档
@@ -98,6 +103,18 @@ Rscript analysis/run_analysis.R \
   --step all
 ```
 
+构建核心物种健康网络并分析核心物种作用：
+
+```bash
+Rscript run_pipeline.R \
+  --config config/core_network.yaml \
+  --outdir results
+
+Rscript core_species/run_core_species.R \
+  --base-dir results/network \
+  --step all
+```
+
 调试时只跑一个队列：
 
 ```bash
@@ -113,6 +130,8 @@ Rscript run_pipeline.R \
 ```bash
 ./run.sh spiec_rc          # read count + SPIEC-EASI + 10% 流行率
 ./run.sh eras              # ERAS 时间点
+./run.sh core_network      # 20 个国家核心物种 Control 网络
+./run.sh core_species      # 核心物种表格、图和汇总
 ./run.sh full              # 73 队列 + ERAS，再跑全部分析
 ./run.sh analysis          # 对已有结果树跑分析
 DRY_RUN=1 ./run.sh full    # 只打印命令
@@ -141,7 +160,10 @@ DRY_RUN=1 ./run.sh full    # 只打印命令
 
 `--print-config` 打印合并后的有效配置但不运行；`--save-config FILE` 先把配置
 写成可再次读取的文件（按扩展名写 YAML 或 R 格式），然后继续运行。ERAS 使用
-`config/eras.yaml` 和 `config/eras.tsv`。
+`config/eras.yaml` 和 `config/eras.tsv`。核心物种健康网络使用
+`config/core_network.yaml` 和 `config/cohorts_core.tsv`，输出到
+`<outdir>/all_country_core/`；核心物种分析有自己的配置
+`core_species/config/core_species.yaml`，详见 `core_species/README.md`。
 
 ## 输出布局
 
@@ -186,6 +208,23 @@ final       组合主图与分面板
 `--step all` 执行除 `hub_summary` 以外的全部步骤；`hub_summary` 需要外部汇总表
 （`--input`/`--outdir`）。`--network-dir` 和 `--results` 可以指向同一棵树
 （旧布局），也可以像上面一样分别指向网络和分析目录。
+
+## 核心物种分析
+
+`core_species/run_core_species.R` 读取相同的 `PR*/res_rc` 网络对象，输出：
+
+```text
+results/core_species/
+  qc/ tables/ plot_data/          分析表格
+  figures/                        主图和补充图
+  manuscript_stats/               汇总表格和 markdown
+```
+
+使用固定的全球核心物种名单（`core_species/data/` 中 143 个稀有、35 个丰富），
+保留每张网络的局部丰度分类；preserved 边要求边仍存在且两端丰度类别不变。
+`--step` 支持 `analysis`、`figures`、`manuscript` 或 `all`。置换次数、随机种子
+和 consensus hub 阈值在 `core_species/config/core_species.yaml` 中配置。
+定义与完整输出列表见 [`core_species/README.md`](core_species/README.md)。
 
 ## 复现已发表运行
 
