@@ -10,6 +10,7 @@ rebuilt. The canonical result tree is:
   analysis/      downstream tables and figures
   core_network/  Control-only core-species networks (20 countries)
   core_species/  core-species tables, figures and manuscript summary
+  hadza/         Hadza five- and three-timepoint season networks
   control/       shard tables, launchers, logs, effective configs,
                  executed_files_<UTC>/ code and config snapshot
 ```
@@ -30,10 +31,12 @@ The script:
 4. runs all analysis steps on node001;
 5. builds the 20 core-species Control networks with
    `config/core_network.yaml` and runs `core_species/run_core_species.R`
-   (`--step all`, 1000 label permutations, seed 123) on node001.
+   (`--step all`, 1000 label permutations, seed 123) on node001;
+6. runs the Hadza five- and three-timepoint season networks with
+   `config/hadza.yaml` and `config/hadza.tsv`.
 
 Useful overrides: `NODE_A`, `NODE_B`, `RUN`, `REPO`, `SKIP_ANALYSIS=1`,
-`SKIP_CORE=1`, `DRY_RUN=1`, `SNAPSHOT_ONLY=1`.
+`SKIP_CORE=1`, `SKIP_HADZA=1`, `DRY_RUN=1`, `SNAPSHOT_ONLY=1`.
 
 For this run the snapshot is:
 

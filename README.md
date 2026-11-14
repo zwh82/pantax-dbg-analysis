@@ -147,6 +147,7 @@ The equivalent one-command recipes are in `run.sh`:
 ./run.sh eras              # ERAS time course
 ./run.sh core_network      # 20 Control-only core-species networks
 ./run.sh core_species      # core-species tables, figures and summary
+./run.sh hadza             # Hadza five- and three-timepoint season networks
 ./run.sh full              # 73 cohorts + ERAS, then all analysis steps
 ./run.sh analysis          # analysis on an existing result tree
 DRY_RUN=1 ./run.sh full    # print commands only
@@ -181,7 +182,9 @@ continuing. The ERAS run uses `config/eras.yaml` and `config/eras.tsv`. The
 core-species Control networks use `config/core_network.yaml` with
 `config/cohorts_core.tsv` and write to `<outdir>/all_country_core/`; the
 core-species analysis has its own config at
-`core_species/config/core_species.yaml` (see `core_species/README.md`).
+`core_species/config/core_species.yaml` (see `core_species/README.md`). The
+Hadza season runs use `config/hadza.yaml`, `config/hadza.tsv` and the two
+metadata files in `config/`.
 
 ## Output layout
 

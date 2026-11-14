@@ -136,6 +136,7 @@ Rscript run_pipeline.R \
 ./run.sh eras              # ERAS 时间点
 ./run.sh core_network      # 20 个国家核心物种 Control 网络
 ./run.sh core_species      # 核心物种表格、图和汇总
+./run.sh hadza             # Hadza 五时段和三时段季节网络
 ./run.sh full              # 73 队列 + ERAS，再跑全部分析
 ./run.sh analysis          # 对已有结果树跑分析
 DRY_RUN=1 ./run.sh full    # 只打印命令
@@ -168,6 +169,8 @@ DRY_RUN=1 ./run.sh full    # 只打印命令
 `config/core_network.yaml` 和 `config/cohorts_core.tsv`，输出到
 `<outdir>/all_country_core/`；核心物种分析有自己的配置
 `core_species/config/core_species.yaml`，详见 `core_species/README.md`。
+Hadza 季节网络使用 `config/hadza.yaml`、`config/hadza.tsv` 和 `config/`
+下的两个元数据文件。
 
 ## 输出布局
 

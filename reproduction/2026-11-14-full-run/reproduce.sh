@@ -13,14 +13,17 @@
 #   analysis/      downstream tables and figures
 #   core_network/  20 Control-only core-species networks
 #   core_species/  core-species tables, figures and manuscript summary
+#   hadza/         Hadza five- and three-timepoint season networks
 #
-# Re-running overwrites network/, analysis/, core_network/ and core_species/
-# (the original /home/work/wenhai/meta/high_rare_net4 tree is never touched).
+# Re-running overwrites network/, analysis/, core_network/, core_species/ and
+# hadza/ (the original /home/work/wenhai/meta/high_rare_net4 tree is never
+# touched).
 #
 # Useful overrides:
 #   NODE_A=node001 NODE_B=node003
 #   SKIP_ANALYSIS=1        only rebuild the networks
 #   SKIP_CORE=1            skip core_network/ and core_species/
+#   SKIP_HADZA=1           skip hadza/
 #   DRY_RUN=1              print the ssh commands without running anything
 #   SNAPSHOT_ONLY=1        only save the executed code/config snapshot
 #
@@ -41,6 +44,7 @@ NODE_A=${NODE_A:-node001}
 NODE_B=${NODE_B:-node003}
 SKIP_ANALYSIS=${SKIP_ANALYSIS:-0}
 SKIP_CORE=${SKIP_CORE:-0}
+SKIP_HADZA=${SKIP_HADZA:-0}
 SNAPSHOT_ONLY=${SNAPSHOT_ONLY:-0}
 MAX_WAIT=${MAX_WAIT:-21600}   # seconds; 6 hours
 DRY_RUN=${DRY_RUN:-0}
@@ -193,7 +197,8 @@ if [ "$DRY_RUN" != "1" ]; then
           "$RUN/control/status/w*.state" "$RUN/control/status/e13_eras.state" \
           "$RUN/control/status/analysis.exit" "$RUN/control/status/analysis.state" \
           "$RUN/control/status/core_network.exit" "$RUN/control/status/core_network.state" \
-          "$RUN/control/status/core_species.exit" "$RUN/control/status/core_species.state"
+          "$RUN/control/status/core_species.exit" "$RUN/control/status/core_species.state" \
+          "$RUN/control/status/hadza.exit" "$RUN/control/status/hadza.state"
   fi
   snapshot_executed_files
 fi
@@ -216,6 +221,9 @@ if [ "$DRY_RUN" = "1" ]; then
     echo "+ bash $RUN/control/launchers/core_network.sh"
     echo "+ bash $RUN/control/launchers/core_species.sh"
   fi
+  if [ "$SKIP_HADZA" != "1" ]; then
+    echo "+ bash $RUN/control/launchers/hadza.sh"
+  fi
   exit 0
 fi
 
@@ -234,9 +242,14 @@ if [ "$SKIP_CORE" != "1" ]; then
   run_recorded core_species 21600
 fi
 
+if [ "$SKIP_HADZA" != "1" ]; then
+  run_recorded hadza 21600
+fi
+
 echo "Done."
 echo "  networks:      $RUN/network"
 echo "  analysis:      $RUN/analysis"
 echo "  core networks: $RUN/core_network/all_country_core"
 echo "  core species:  $RUN/core_species"
+echo "  hadza:         $RUN/hadza"
 echo "  logs:          $RUN/control/logs"

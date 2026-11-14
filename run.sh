@@ -20,6 +20,7 @@
 #   merged         merged-cohort table (set MERGED_TABLE)         -> res_rc
 #   network_only   build Control networks only                    -> all_country/
 #   core_network   core-species Control networks per country      -> all_country_core/
+#   hadza          Hadza five- and three-timepoint season networks
 #   analysis       downstream tables and figures on a result tree
 #   core_species   core-species role analysis, figures, summary
 #   full           both cohort tables into one tree, then analysis
@@ -31,6 +32,7 @@
 #   OUT_ROOT=/path            root for all scenario outputs
 #   COHORTS=/path             non-ERAS cohort table
 #   CORE_COHORTS=/path        core-species country table
+#   HADZA_COHORTS=/path       Hadza cohort table
 #   ERAS_COHORTS=/path        ERAS cohort table
 #   MERGED_TABLE=/path        merged-cohort table
 #   ANALYSIS_RESULTS=/path    analysis output root (default <OUT_ROOT>/full/analysis)
@@ -61,6 +63,7 @@ export R_LIBS=${R_LIBS:-/home/wenhai/miniconda3/envs/r_4.3/lib/R/library:/home/w
 OUT_ROOT=${OUT_ROOT:-$ROOT/runs}
 COHORTS=${COHORTS:-$ROOT/config/cohorts.tsv}
 CORE_COHORTS=${CORE_COHORTS:-$ROOT/config/cohorts_core.tsv}
+HADZA_COHORTS=${HADZA_COHORTS:-$ROOT/config/hadza.tsv}
 ERAS_COHORTS=${ERAS_COHORTS:-$ROOT/config/eras.tsv}
 MERGED_TABLE=${MERGED_TABLE:-$SRC/scripts/merged_network_metadata.tsv}
 ANALYSIS_RESULTS=${ANALYSIS_RESULTS:-$OUT_ROOT/full/analysis}
@@ -287,6 +290,14 @@ case "$scenario" in
     run_pipeline_to core_network "$OUT_ROOT/core_network/network" \
       --config "$ROOT/config/core_network.yaml" \
       --cohorts "$CORE_COHORTS" \
+      "$@"
+    ;;
+
+  # ---- Hadza season networks ---------------------------------------------
+  hadza)
+    run_pipeline_to hadza "$OUT_ROOT/hadza" \
+      --config "$ROOT/config/hadza.yaml" \
+      --cohorts "$HADZA_COHORTS" \
       "$@"
     ;;
 
