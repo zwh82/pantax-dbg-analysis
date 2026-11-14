@@ -1,0 +1,6 @@
+runs/
+*.log
+.Rhistory
+.RData
+.Rproj.user/
+__pycache__/

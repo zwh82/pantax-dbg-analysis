@@ -1,0 +1,73 @@
+# Analysis / plotting configuration (default).
+# Analysis outputs are written under `results_dir`.  Cohort networks are read
+# from `network_dir` when it is set, otherwise from `results_dir` (legacy
+# layout).  Override with CLI flags (--results, --network-dir, --suffix,
+# --step, --input, --outdir) or with another config file.
+
+# Root for the analysis tables and figures (net_compare2_V3/, consensus_hub/,
+# stab/, mean_degree_change/, rho_compare/, scripts/final_figures/).
+results_dir: "/home/work/wenhai/meta/high_rare_net4"
+
+# Root that holds the cohort network directories.  null keeps the legacy
+# layout where networks and analysis outputs share results_dir.  Set this to a
+# separate directory (for example `.../network`) to keep them apart.
+network_dir: null
+
+# Network result suffixes.  The first suffix is used by steps that historically
+# took a single suffix.
+suffix: res_rc
+
+# Prevalence used in the species-prevalence file names written by the pipeline.
+prevalence: 0.1
+
+# Disease labels that each step skips (legacy `next` conditions).
+skip_diseases:
+  stability: [Health]
+  node: [Health]
+  degree: []
+  net_compare: [Health]
+  rho: [ERAS, Health]
+  rho_edge: [ERAS, Health]
+  hub: [ERAS]
+
+# Consensus-hub definition shared by both hub scripts.
+hub:
+  top_percent: 0.1
+  min_degree: 3
+  vote_threshold: 3
+  seed: 123
+  levels: [rare, abundant]
+  colors:
+    abundant: "#e34a33"
+    rare: "#2b8cbe"
+  step_within: 0.65
+  step_between: 1.25
+  bar_width: 0.55
+  figure_height: 11
+
+# Output sub-directories, relative to results_dir.
+paths:
+  stability: stab
+  node_overlap: net_compare/node_overlap
+  degree: mean_degree_change
+  net_compare: net_compare2_V3
+  rho: rho_compare
+  hub: consensus_hub
+  final: scripts/final_figures
+  final_split: scripts/final_figures/main_split
+
+# Disease-name mapping; null means <results_dir>/scripts/disease_name_mapping.tsv
+disease_map_file: null
+
+# Standalone hub-summary plot defaults (override with --input / --outdir).
+hub_summary:
+  input: "/home/work/meishi/Themis/module_hub/outputs_net4/ConsensusHub_master_summary.csv"
+  out_dir: "/home/work/meishi/Themis/module_hub/outputs_net4/Meta_ConsensusHub_Abundance_res_rc_net4"
+
+# ERAS cohort whose res_rc/data supplies the final figure inputs.
+eras_cohort: PRJEB20800_57_ERAS
+
+runtime:
+  library_paths:
+    - /home/wenhai/miniconda3/envs/r_4.3/lib/R/library
+    - /home/wenhai/application/Qmatey/tools/R

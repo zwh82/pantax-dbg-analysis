@@ -1,0 +1,95 @@
+# ERAS / antibiotic time-course configuration.
+#
+# Same parameters as config/pipeline.yaml, with two ERAS-specific changes:
+#   - cohorts_file points at the single-row ERAS table (config/eras.tsv)
+#   - runs.eras is true (D0 is renamed to Control, time points keep their order)
+#
+# Run directly:
+#   Rscript run_pipeline.R --config config/eras.yaml --outdir /path/to/results
+#
+# The default output.dir below is the legacy result root.  Pass --outdir to
+# write into a new tree instead; without it the ERAS directories in the legacy
+# tree are overwritten.  Every run records the effective config with
+# --save-config.
+
+# ---- input ---------------------------------------------------------------
+cohorts_file: config/eras.tsv
+input:
+  merged: false                     # [is_merge] one merged matrix per disease row
+  data_type: read_count             # [is_rc] read_count or relative_abundance
+  fill_zero_counts: false           # [is_rc_fill] replace zeros with 1e-8
+  floor: 0                          # [FilterLow] values below this become 0
+  prevalence: 0.1                   # [PREVALENCE_THRESHOLD]
+  present: 0                        # [PRESENT_THRESHOLD]
+  skip_prevalence_filter: false     # [Notprefilter]
+
+# ---- network construction ------------------------------------------------
+network:
+  tool: spiec-easi                  # [net_tool] spiec-easi, flashweave, sparcc
+  graph_file: null                  # [graph_file] read a pre-built GML instead
+  filter_by_weight: false           # [is_filter] drop |weight| < 0.1
+  filter_by_confidence: false       # [is_edge_con_filter] keep merge >= 0.8
+  spiec_easi:
+    relative_abundance: false       # [spieceasi_ra] also selects the 4.4 library
+    method: mb
+    sel.criterion: bstars
+    lambda.min.ratio: 0.001
+    nlambda: 200
+    pulsar_select: true
+    pulsar:
+      thresh: 0.05
+      subsample.ratio: 0.8
+      rep.num: 100
+      seed: 123
+    norm.params:
+      method: clr
+
+# ---- abundance classification -------------------------------------------
+abundance:
+  thresholds:
+    high: 0.001
+    low_min: 0.0001
+    low_max: 0.001
+    very_low_min: 0.00001
+    very_low_max: 0.0001
+  # Keep labels in sync when the thresholds above are changed.
+  colors:
+    high: "#E41A1C"
+    low: "#377EB8"
+    very_low: "#4DAF4A"
+    other: "#999999"
+  labels:
+    high: "High abundance (>1e-3)"
+    low: "Low abundance (1e-4~1e-3)"
+    very_low: "Very low abundance (1e-5~1e-4)"
+    other: "Other"
+
+# ---- hub definition ------------------------------------------------------
+hub:
+  top_percent: 0.1
+  min_degree: 5
+
+# ---- output --------------------------------------------------------------
+output:
+  dir: "/home/work/wenhai/meta/high_rare_net4/"   # [all_out_dir] override with --outdir
+  suffix: null                      # [outdir_last] null derives it from the switches
+  flag: ""                          # [outflag]
+
+# ---- run modes -----------------------------------------------------------
+runs:
+  network_only: false               # [build_net_only] build Control networks only
+  core_network_only: false          # [build_core_net_only] core-species input
+  eras: true                        # [ERAS] D0 -> Control, time-point order
+  prjna398089_ibd_not: true         # [PRJNA398089_IBD_not]
+
+# ---- runtime -------------------------------------------------------------
+runtime:
+  library_paths:
+    - /home/wenhai/miniconda3/envs/r_4.3/lib/R/library
+    - /home/wenhai/application/Qmatey/tools/R
+  # SpiecEasi is loaded from a fixed library, as in the original entry point.
+  spiec_easi_library:
+    default: /home/wenhai/miniconda3/envs/r_4.3/lib/R/library
+    # ra library can process CLR in relative abundance data
+    relative_abundance: /home/wenhai/R/x86_64-redhat-linux-gnu-library/4.4
+  seed: 123
