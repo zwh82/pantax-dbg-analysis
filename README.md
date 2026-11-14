@@ -1,14 +1,16 @@
 # pantax-dbg-analysis
 
-**语言 / Language:** [中文](README.md) | [English](README.en.md)
+**Language / 语言:** [English](README.md) | [中文](README.zh.md)
 
-基于 `pantax-dbg` 产出的 profiling 数据，进行 74 个队列的肠道菌群共现网络
-构建、下游分析与图件，以及 ERAS 时间点的网络恢复分析。代码重构自
-`high_rare_net4`，原目录 `/home/work/wenhai/meta/high_rare_net4` 未做任何修改。
+Analysis of profiling data produced by `pantax-dbg`: co-occurrence network
+construction for 74 gut microbiome cohorts, downstream statistics and figures,
+and network-recovery analysis across the ERAS time points. The code was
+refactored from `high_rare_net4`; the original tree
+`/home/work/wenhai/meta/high_rare_net4` was not modified.
 
-## 范围
+## Scope
 
-建网部分覆盖从 `00_main.R` 可达的流程：
+The network-construction part covers the flow reachable from `00_main.R`:
 
 ```
 00_main.R  ->  run_pipeline.R
@@ -22,39 +24,41 @@
 06_process_one.R -> R/07_process_cohort.R
 ```
 
-下游分析与绘图（`net_compare2_V3.R`、`rho_plot.R`、`stab_plot.R` 等）
-在 `analysis/` 下单独重构，见 `analysis/README.md`。
+Downstream analysis and plotting (`net_compare2_V3.R`, `rho_plot.R`,
+`stab_plot.R`, and related scripts) were refactored separately under
+`analysis/`; see `analysis/README.md`.
 
-## 目录
+## Layout
 
 ```
-run_pipeline.R          入口；参数解析、加载包、按队列循环
-run.sh                  可复现的场景配方（显式参数、日志、有效配置）
+run_pipeline.R          entry point: argument parsing, package loading, cohort loop
+run.sh                  reproducible scenario recipes (explicit flags, logs, effective config)
 config/
-  pipeline.yaml         所有运行参数的默认值（旧 01_config.R 的开关集中在此）
-  eras.yaml             ERAS 专用配置（指向 eras.tsv，runs.eras: true）
-  pipeline.R            同一份配置的 R 格式示例（仅 --config 显式指定时使用）
-  read_config.R         配置加载器（YAML 默认，兼容 R 格式）
-  cohorts.tsv           73 个非 ERAS 队列的输入表
-  eras.tsv              单行 ERAS 队列输入表（含时间点数据路径）
-  PRJEB20800_57_ERAS_metadata.csv  ERAS 样本分组元数据（随仓库保存）
+  pipeline.yaml         defaults for all run parameters (legacy 01_config.R switches)
+  eras.yaml             ERAS-specific config (points at eras.tsv, runs.eras: true)
+  pipeline.R            R-format example of the same config (only read via --config)
+  read_config.R         config loader (YAML by default, R format also accepted)
+  cohorts.tsv           input table for the 73 non-ERAS cohorts
+  eras.tsv              single-row ERAS input table (with time-point data paths)
+  PRJEB20800_57_ERAS_metadata.csv  ERAS sample metadata (shipped with the repo)
 R/
-  00_config.R           队列表读取、输出路径、配置校验
-  01_abundance.R        丰度分档、流行率过滤、矩阵合并
-  02_network.R          建网（SPIEC-EASI/FlashWeave/SparCC）、拓扑指标、hub
-  03_hub_analysis.R     hub 与差异物种重叠
-  04_edge_plots.R       边数量/强度/正负/富集类型图
-  05_centrality_plots.R Rich vs Rare 中心性比较
-  06_network_plot.R     单组网络图与节点表
-  07_process_cohort.R   单队列主流程
-analysis/               下游分析与绘图（单独入口与验证，见 analysis/README.md）
-REVIEW.md               重构差异与 code-humanizer 扫描结果
+  00_config.R           cohort-table parsing, output paths, config validation
+  01_abundance.R        abundance classes, prevalence filter, matrix merging
+  02_network.R          network construction (SPIEC-EASI/FlashWeave/SparCC), topology, hubs
+  03_hub_analysis.R     hub and differential-species overlap
+  04_edge_plots.R       edge count/strength/sign/interaction-type plots
+  05_centrality_plots.R Rich vs Rare centrality comparisons
+  06_network_plot.R     per-group network plots and node tables
+  07_process_cohort.R   per-cohort main workflow
+analysis/               downstream analysis and plotting (entry point and checks in analysis/README.md)
+REVIEW.md               refactor differences and code-humanizer scan
 ```
 
-## 运行
+## Running
 
-参数全部通过命令行传入，`config/pipeline.yaml` 只是默认值；不需要复制粘贴
-修改配置块，也不需要为每种模式保存一个配置副本。
+All parameters are passed on the command line; `config/pipeline.yaml` only
+provides defaults. There is no need to copy and edit config blocks, and no need
+to keep one config copy per mode.
 
 ```bash
 export LD_LIBRARY_PATH=/home/wenhai/miniconda3/envs/r_4.3/lib
@@ -62,9 +66,9 @@ export R_LIBS=/home/wenhai/miniconda3/envs/r_4.3/lib/R/library:/home/wenhai/appl
 Rscript run_pipeline.R --help
 ```
 
-常用开关（均可与 `--config` 组合，命令行优先）：
+Common flags (all can be combined with `--config`; command-line values win):
 
-| 参数 | 对应旧变量 |
+| Flag | Legacy variable |
 |---|---|
 | `--data-type read_count\|relative_abundance` | `is_rc` |
 | `--tool spiec-easi\|flashweave\|sparcc` | `net_tool` |
@@ -77,127 +81,136 @@ Rscript run_pipeline.R --help
 | `--network-only TRUE` / `--core-network-only TRUE` | `build_net_only` / `build_core_net_only` |
 | `--spiec-easi-ra TRUE` | `spieceasi_ra` |
 | `--suffix NAME\|auto` | `outdir_last` |
-| `--cohorts FILE` / `--outdir DIR` / `--only A,B` | `config_file` / `all_out_dir` / 调试单队列 |
-| `--hub-top-percent` / `--hub-min-degree` | hub 定义 |
+| `--cohorts FILE` / `--outdir DIR` / `--only A,B` | `config_file` / `all_out_dir` / single-cohort debugging |
+| `--hub-top-percent` / `--hub-min-degree` | hub definition |
 
-任意嵌套字段可以用 `--set`，路径用 `/` 分隔：
+Any nested field can be set with `--set`; separate levels with `/`:
 
 ```bash
 --set network/spiec_easi/pulsar/rep.num=50
 --set abundance/thresholds/high=2e-3
 ```
 
-`--print-config` 以 YAML 打印合并后的完整配置和推导出的输出目录/后缀；
-`--save-config FILE` 把同样的配置写成可再次传给 `--config` 的文件，然后继续运行。
-保存格式由扩展名决定：`.yaml`/`.yml` 写 YAML，其他扩展名写 R 列表；
-`--config` 两种格式都接受。
+`--print-config` prints the merged, effective config as YAML plus the derived
+output directory/suffix. `--save-config FILE` writes the same config to a file
+that can be passed back via `--config`, then continues the run. The format is
+chosen by extension: `.yaml`/`.yml` writes YAML, anything else writes an R list;
+`--config` accepts both.
 
 ```bash
-# 查看本次实际会用的配置（不运行）
+# Show the effective config without running
 Rscript run_pipeline.R --tool sparcc --outdir /tmp/out --print-config
 
-# 保存有效配置并运行
+# Save the effective config and run
 Rscript run_pipeline.R --tool sparcc --outdir /tmp/out --save-config /tmp/out/config.yaml
 ```
 
-### run.sh（可复现的配方）
+### run.sh (reproducible recipes)
 
-`run.sh` 把常用组合写成带注释的场景，每条命令都显式列出参数，并把
-实际命令、日志和有效配置保存到结果目录：
+`run.sh` turns common combinations into commented scenarios. Every command
+lists its flags explicitly, and the command, log and effective config are saved
+next to the results:
 
 ```bash
 ./run.sh spiec_rc                  # read count + SPIEC-EASI + 0.1
-./run.sh eras                      # ERAS 表 + 时间顺序
-./run.sh relative                  # 相对丰度 + SPIEC-EASI
+./run.sh eras                      # ERAS table + time-point ordering
+./run.sh relative                  # relative abundance + SPIEC-EASI
 ./run.sh flashweave                # read count + FlashWeave
 ./run.sh sparcc                    # read count + SparCC
-./run.sh filter_weight             # 边权重过滤
-./run.sh filter_conf               # 边置信度过滤
-./run.sh network_only              # 只建 Control 网络
-./run.sh full                      # 73 队列 + ERAS，再跑全部分析
-./run.sh analysis                  # 对已有结果树跑分析
-DRY_RUN=1 ./run.sh full            # 只打印命令
+./run.sh filter_weight             # edge-weight filter
+./run.sh filter_conf               # edge-confidence filter
+./run.sh network_only              # Control networks only
+./run.sh full                      # 73 cohorts + ERAS, then all analysis steps
+./run.sh analysis                  # analysis on an existing result tree
+DRY_RUN=1 ./run.sh full            # print commands only
 ```
 
-默认输出到 `./runs/<scenario>/`，不会覆盖原项目：
+Outputs go to `./runs/<scenario>/` and never overwrite the original project:
 
 ```
 runs/<scenario>/
-  network/            每个队列一个目录（PRJ.../res_rc/...）
-    configs/<scenario>.yaml   本次有效配置
-  analysis/           下游分析表格与图件（full/analysis 场景）
-logs/<scenario>.log   完整命令与输出
+  network/            one directory per cohort (PRJ.../res_rc/...)
+    configs/<scenario>.yaml   effective config for this run
+  analysis/           downstream tables and figures (full/analysis scenarios)
+logs/<scenario>.log   full command and output
 ```
 
-可用 `OUT_ROOT`、`COHORTS`、`ERAS_COHORTS`、`MERGED_TABLE`、
-`ANALYSIS_RESULTS`、`ANALYSIS_NETWORK`、`ANALYSIS_SUFFIX`、
-`ANALYSIS_STEP` 覆盖路径和步骤。额外的 `run_pipeline.R` 参数可以追加在
-场景名后面，例如：
+Use `OUT_ROOT`, `COHORTS`, `ERAS_COHORTS`, `MERGED_TABLE`,
+`ANALYSIS_RESULTS`, `ANALYSIS_NETWORK`, `ANALYSIS_SUFFIX` and
+`ANALYSIS_STEP` to override paths and steps. Extra `run_pipeline.R` flags can
+be appended after the scenario name:
 
 ```bash
 ./run.sh spiec_rc --only PRJNA398089_598_CD
 ```
 
-`--outdir` 不写时会落到旧目录 `/home/work/wenhai/meta/high_rare_net4/`，
-会覆盖已有结果；`run.sh` 始终显式指定输出目录。
+If `--outdir` is omitted, the pipeline falls back to the legacy tree
+`/home/work/wenhai/meta/high_rare_net4/` and overwrites existing results;
+`run.sh` always sets an explicit output directory.
 
-### ERAS 专用配置
+### ERAS-specific config
 
-`config/eras.yaml` 是 `pipeline.yaml` 的 ERAS 版本，只改了两处：
+`config/eras.yaml` is the ERAS version of `pipeline.yaml` with two changes:
 
 - `cohorts_file: config/eras.tsv`
-- `runs.eras: true`（D0 重命名为 Control，时间点保持 D4/D8/D42/D180 顺序）
+- `runs.eras: true` (D0 is renamed to Control; time points keep the
+  D4/D8/D42/D180 order)
 
-`config/eras.tsv` 是单行 ERAS 队列表，已经使用 `themis_abundance_matrix_0508`
-下实际存在的矩阵路径；元数据 `config/PRJEB20800_57_ERAS_metadata.csv` 也已随仓库
-保存，不再依赖 `high_rare_net3`。直接运行：
+`config/eras.tsv` is a single-row ERAS cohort table that points at matrices that
+actually exist under `themis_abundance_matrix_0508`. The metadata file
+`config/PRJEB20800_57_ERAS_metadata.csv` is shipped with the repo, so the ERAS
+run no longer depends on `high_rare_net3`. Run it directly:
 
 ```bash
 Rscript run_pipeline.R --config config/eras.yaml --outdir /path/to/results
 ```
 
-`config/eras.yaml` 里的 `output.dir` 仍是旧结果根目录；不传 `--outdir` 会覆盖
-旧目录中的 ERAS 结果。`./run.sh eras` 默认使用这份队列表，并写入
-`$OUT_ROOT/eras/network/`。
+The `output.dir` in `config/eras.yaml` is still the legacy result root; without
+`--outdir` it overwrites ERAS results there. `./run.sh eras` uses this cohort
+table and writes to `$OUT_ROOT/eras/network/`.
 
-## 配置要点
+## Configuration notes
 
-`config/pipeline.yaml` 保留了旧入口的全部模式，并去掉了大量互相冲突的注释块
-（`config/pipeline.R` 是同一份配置的 R 格式示例，仅 `--config` 显式指定时读取）：
+`config/pipeline.yaml` keeps every mode from the legacy entry point and removes
+the large, mutually conflicting comment blocks (`config/pipeline.R` is an
+R-format example of the same config, read only when passed explicitly):
 
-- `input$data_type`：`read_count` 或 `relative_abundance`
-- `input$merged`：合并队列模式（旧 `is_merge`）
-- `input$skip_prevalence_filter`：旧 `Notprefilter`
-- `network$tool`：`spiec-easi`、`flashweave`、`sparcc`
-- `network$filter_by_weight` / `filter_by_confidence`：旧边过滤开关
-- `runs$network_only` / `core_network_only`：旧 `build_net_only`
-- `runs$eras`：全局 ERAS 时间顺序开关
-- `output$suffix`：为 `NULL` 时按旧规则自动推导（`res_rc`、`res_raclr_no_filter`、
-  `res_flashweave_rc` 等）
-- `abundance$thresholds` 与 `abundance$labels`：分档阈值和图例文字，改阈值时同步改标签
+- `input$data_type`: `read_count` or `relative_abundance`
+- `input$merged`: merged-cohort mode (legacy `is_merge`)
+- `input$skip_prevalence_filter`: legacy `Notprefilter`
+- `network$tool`: `spiec-easi`, `flashweave`, `sparcc`
+- `network$filter_by_weight` / `filter_by_confidence`: legacy edge filters
+- `runs$network_only` / `core_network_only`: legacy `build_net_only`
+- `runs$eras`: global ERAS time-ordering switch
+- `output$suffix`: when `NULL`, derived from the switches using the legacy
+  rules (`res_rc`, `res_raclr_no_filter`, `res_flashweave_rc`, etc.)
+- `abundance$thresholds` and `abundance$labels`: abundance-class thresholds and
+  legend text; update the labels when changing the thresholds
 
-`input$prevalence` 同时用于流行率过滤和输出文件名，保持旧行为：即使
-`skip_prevalence_filter = TRUE`，文件名仍带 `0.1`。
+`input$prevalence` is used both for the prevalence filter and in output file
+names, preserving the legacy behaviour: even with
+`skip_prevalence_filter = TRUE`, file names still contain `0.1`.
 
-## 验证
+## Verification
 
-用合成数据对旧代码和新代码做了逐文件对照，覆盖：
+The legacy and refactored code were compared file by file on synthetic inputs:
 
-| 场景 | 比较文件数 | 结果 |
+| Scenario | Files compared | Result |
 |---|---|---|
-| read count + SPIEC-EASI + 10% 流行率 | 36 | 一致 |
-| GML 固定网络输入 + 多组出图 | 40 | 一致 |
-| 跳过流行率过滤 | 36 | 一致 |
-| 相对丰度输入 | 40 | 一致 |
-| 仅建 Control 网络 | 6 | 一致 |
-| 合并队列 | 36 | 一致（旧分支已损坏，见 REVIEW） |
-| 边权重过滤 | 4 | 一致 |
-| 边置信度过滤 | 4 | 一致 |
-| SparCC | 43 | 一致 |
-| FlashWeave | 41 | 一致 |
+| read count + SPIEC-EASI + 10% prevalence | 36 | match |
+| fixed GML network input + multi-group plots | 40 | match |
+| prevalence filter skipped | 36 | match |
+| relative-abundance input | 40 | match |
+| Control networks only | 6 | match |
+| merged cohorts | 36 | match (legacy branch was broken; see REVIEW) |
+| edge-weight filter | 4 | match |
+| edge-confidence filter | 4 | match |
+| SparCC | 43 | match |
+| FlashWeave | 41 | match |
 
-比较内容：网络 RDS 的顶点/边属性、CSV/TSV、统计文本、ggplot 的 build data
-与标签。PNG 因设备差异未做字节比较。详见 `REVIEW.md`。
+Compared content: vertex/edge attributes of network RDS files, CSV/TSV tables,
+statistical text, and ggplot build data and labels. PNG bytes are not compared
+because they depend on the graphics device. See `REVIEW.md` for details.
 
 ## License
 
