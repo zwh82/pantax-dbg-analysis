@@ -1,21 +1,26 @@
 #!/bin/bash
-# Reproduce the 2026-11-14 full run (73 non-ERAS cohorts + ERAS, then analysis).
+# Reproduce the 2026-11-14 full run (73 non-ERAS cohorts + ERAS, analysis,
+# core-species Control networks and core-species role analysis).
 #
 # One command:
 #   bash reproduce.sh
 #
 # It launches the 12 recorded cohort shards on node001/node003, waits for all
-# 13 pipeline workers, checks their exit codes, then runs analysis on node001.
-# Outputs are written to:
-#   network/   cohort networks
-#   analysis/  downstream tables and figures
+# 13 pipeline workers, checks their exit codes, then runs analysis, builds the
+# 20 core-species Control networks and runs the core-species analysis on
+# node001. Outputs are written to:
+#   network/       cohort networks
+#   analysis/      downstream tables and figures
+#   core_network/  20 Control-only core-species networks
+#   core_species/  core-species tables, figures and manuscript summary
 #
-# Re-running overwrites network/ and analysis/ (the original
-# /home/work/wenhai/meta/high_rare_net4 tree is never touched).
+# Re-running overwrites network/, analysis/, core_network/ and core_species/
+# (the original /home/work/wenhai/meta/high_rare_net4 tree is never touched).
 #
 # Useful overrides:
 #   NODE_A=node001 NODE_B=node003
 #   SKIP_ANALYSIS=1        only rebuild the networks
+#   SKIP_CORE=1            skip core_network/ and core_species/
 #   DRY_RUN=1              print the ssh commands without running anything
 #   SNAPSHOT_ONLY=1        only save the executed code/config snapshot
 #
@@ -35,6 +40,7 @@ RSCRIPT=${RSCRIPT:-/home/wenhai/miniconda3/envs/r_4.3/bin/Rscript}
 NODE_A=${NODE_A:-node001}
 NODE_B=${NODE_B:-node003}
 SKIP_ANALYSIS=${SKIP_ANALYSIS:-0}
+SKIP_CORE=${SKIP_CORE:-0}
 SNAPSHOT_ONLY=${SNAPSHOT_ONLY:-0}
 MAX_WAIT=${MAX_WAIT:-21600}   # seconds; 6 hours
 DRY_RUN=${DRY_RUN:-0}
@@ -100,6 +106,7 @@ snapshot_executed_files() {
   cp -a "$REPO/run_pipeline.R" "$REPO/run.sh" "$REPO/R" "$REPO/config" "$dir/"
   cp -a "$REPO/analysis/run_analysis.R" "$REPO/analysis/R" \
         "$REPO/analysis/config" "$REPO/analysis/verification" "$dir/analysis/"
+  cp -a "$REPO/core_species" "$dir/"
   cp -a "$REPO/verification" "$dir/"
   cp -a "$REPO/README.md" "$REPO/README.zh.md" "$REPO/LICENSE" "$dir/" 2>/dev/null || true
   cp -a "$RUN/control/launchers" "$RUN/control/cohort_sets" \
@@ -151,12 +158,42 @@ run_analysis() {
   [ "$status" = "0" ]
 }
 
+# Launch a recorded launcher on NODE_A and wait for its .exit file.
+run_recorded() {
+  local label=$1
+  local launcher="$RUN/control/launchers/$label.sh"
+  local timeout=$2
+  if [ "$DRY_RUN" = "1" ]; then
+    printf 'ssh %s "setsid bash %q" &\n' "$NODE_A" "$launcher"
+    return 0
+  fi
+  rm -f "$RUN/control/status/$label.exit" "$RUN/control/status/$label.state"
+  echo "launch $label on $NODE_A"
+  ssh -o BatchMode=yes "$NODE_A" \
+    "setsid bash '$launcher' </dev/null >/dev/null 2>&1 & echo \$!" \
+    > "$RUN/control/status/$label.pid"
+  local deadline=$((SECONDS + timeout))
+  while [ ! -f "$RUN/control/status/$label.exit" ]; do
+    if [ "$SECONDS" -ge "$deadline" ]; then
+      echo "$label timed out; see control/logs/$label.log" >&2
+      exit 1
+    fi
+    sleep 20
+  done
+  local status
+  status=$(cat "$RUN/control/status/$label.exit")
+  echo "$label exit=$status"
+  [ "$status" = "0" ]
+}
+
 if [ "$DRY_RUN" != "1" ]; then
   mkdir -p "$RUN/control/status"
   if [ "$SNAPSHOT_ONLY" != "1" ]; then
     rm -f "$RUN"/control/status/w*.exit "$RUN/control/status/e13_eras.exit" \
           "$RUN/control/status/w*.state" "$RUN/control/status/e13_eras.state" \
-          "$RUN/control/status/analysis.exit" "$RUN/control/status/analysis.state"
+          "$RUN/control/status/analysis.exit" "$RUN/control/status/analysis.state" \
+          "$RUN/control/status/core_network.exit" "$RUN/control/status/core_network.state" \
+          "$RUN/control/status/core_species.exit" "$RUN/control/status/core_species.state"
   fi
   snapshot_executed_files
 fi
@@ -175,6 +212,10 @@ done
 
 if [ "$DRY_RUN" = "1" ]; then
   echo "+ bash $RUN/control/launchers/analysis.sh"
+  if [ "$SKIP_CORE" != "1" ]; then
+    echo "+ bash $RUN/control/launchers/core_network.sh"
+    echo "+ bash $RUN/control/launchers/core_species.sh"
+  fi
   exit 0
 fi
 
@@ -188,7 +229,14 @@ if [ "$SKIP_ANALYSIS" != "1" ]; then
   run_analysis
 fi
 
+if [ "$SKIP_CORE" != "1" ]; then
+  run_recorded core_network 7200
+  run_recorded core_species 21600
+fi
+
 echo "Done."
-echo "  networks: $RUN/network"
-echo "  analysis: $RUN/analysis"
-echo "  logs:     $RUN/control/logs"
+echo "  networks:      $RUN/network"
+echo "  analysis:      $RUN/analysis"
+echo "  core networks: $RUN/core_network/all_country_core"
+echo "  core species:  $RUN/core_species"
+echo "  logs:          $RUN/control/logs"

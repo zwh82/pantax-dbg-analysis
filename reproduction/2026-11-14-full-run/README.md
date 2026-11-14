@@ -1,14 +1,17 @@
 # 2026-11-14 full run
 
-This directory records how the 73 non-ERAS cohorts and the ERAS time course
-were rebuilt and analysed. The canonical result tree is:
+This directory records how the 73 non-ERAS cohorts, the ERAS time course, the
+20 core-species Control networks and the core-species role analysis were
+rebuilt. The canonical result tree is:
 
 ```text
 /home/work/wenhai/meta/pantax-dbg-analysis_results_20261114/
-  network/    cohort networks
-  analysis/   downstream tables and figures
-  control/    shard tables, launchers, logs, effective configs,
-              executed_files_<UTC>/ code and config snapshot
+  network/       cohort networks
+  analysis/      downstream tables and figures
+  core_network/  Control-only core-species networks (20 countries)
+  core_species/  core-species tables, figures and manuscript summary
+  control/       shard tables, launchers, logs, effective configs,
+                 executed_files_<UTC>/ code and config snapshot
 ```
 
 ## Reproduce
@@ -24,10 +27,13 @@ The script:
    `GIT_STATUS` and `COMMANDS.txt`;
 2. launches 12 non-ERAS shards and the ERAS shard on node001/node003;
 3. waits for all 13 workers and checks their exit codes;
-4. runs all analysis steps on node001.
+4. runs all analysis steps on node001;
+5. builds the 20 core-species Control networks with
+   `config/core_network.yaml` and runs `core_species/run_core_species.R`
+   (`--step all`, 1000 label permutations, seed 123) on node001.
 
 Useful overrides: `NODE_A`, `NODE_B`, `RUN`, `REPO`, `SKIP_ANALYSIS=1`,
-`DRY_RUN=1`, `SNAPSHOT_ONLY=1`.
+`SKIP_CORE=1`, `DRY_RUN=1`, `SNAPSHOT_ONLY=1`.
 
 For this run the snapshot is:
 
