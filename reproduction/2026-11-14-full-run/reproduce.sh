@@ -29,7 +29,7 @@
 
 set -euo pipefail
 
-RUN=${RUN:-/home/work/wenhai/meta/high_rare_net4_rerun_20261114}
+RUN=${RUN:-/home/work/wenhai/meta/pantax-dbg-analysis_results_20261114}
 REPO=${REPO:-/home/work/wenhai/meta/pantax-dbg-analysis}
 RSCRIPT=${RSCRIPT:-/home/wenhai/miniconda3/envs/r_4.3/bin/Rscript}
 NODE_A=${NODE_A:-node001}

@@ -4,7 +4,7 @@ This directory records how the 73 non-ERAS cohorts and the ERAS time course
 were rebuilt and analysed. The canonical result tree is:
 
 ```text
-/home/work/wenhai/meta/high_rare_net4_rerun_20261114/
+/home/work/wenhai/meta/pantax-dbg-analysis_results_20261114/
   network/    cohort networks
   analysis/   downstream tables and figures
   control/    shard tables, launchers, logs, effective configs,
@@ -32,7 +32,7 @@ Useful overrides: `NODE_A`, `NODE_B`, `RUN`, `REPO`, `SKIP_ANALYSIS=1`,
 For this run the snapshot is:
 
 ```text
-/home/work/wenhai/meta/high_rare_net4_rerun_20261114/control/executed_files_20261114T094014Z
+/home/work/wenhai/meta/pantax-dbg-analysis_results_20261114/control/executed_files_20261114T094014Z
 ```
 
 It records git commit `2f8de29234713883a01040b2940f14751166dfa8` and contains
