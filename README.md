@@ -1,6 +1,8 @@
 # pantax-dbg-analysis
 
-**Language / 语言:** [English](README.md) | [中文](README.zh.md)
+<p align="center">
+  <strong>Language:</strong> <a href="README.md">English</a> | <a href="README.zh.md">Chinese</a>
+</p>
 
 Analysis of profiling data produced by `pantax-dbg`: co-occurrence network
 construction for 74 gut microbiome cohorts, downstream statistics and figures,
@@ -68,21 +70,21 @@ Rscript run_pipeline.R --help
 
 Common flags (all can be combined with `--config`; command-line values win):
 
-| Flag | Legacy variable |
-|---|---|
-| `--data-type read_count\|relative_abundance` | `is_rc` |
-| `--tool spiec-easi\|flashweave\|sparcc` | `net_tool` |
-| `--prevalence 0.1` / `--present 0` | `PREVALENCE_THRESHOLD` / `PRESENT_THRESHOLD` |
-| `--skip-prevalence-filter TRUE` | `Notprefilter` |
-| `--filter-weight TRUE` / `--filter-confidence TRUE` | `is_filter` / `is_edge_con_filter` |
-| `--fill-zero-counts TRUE` / `--floor 1e-3` | `is_rc_fill` / `FilterLow` |
-| `--merged TRUE` | `is_merge` |
-| `--eras TRUE` | `ERAS` |
-| `--network-only TRUE` / `--core-network-only TRUE` | `build_net_only` / `build_core_net_only` |
-| `--spiec-easi-ra TRUE` | `spieceasi_ra` |
-| `--suffix NAME\|auto` | `outdir_last` |
-| `--cohorts FILE` / `--outdir DIR` / `--only A,B` | `config_file` / `all_out_dir` / single-cohort debugging |
-| `--hub-top-percent` / `--hub-min-degree` | hub definition |
+| Flag                                                    | Legacy variable                                             |
+| ------------------------------------------------------- | ----------------------------------------------------------- |
+| `--data-type read_count\|relative_abundance`           | `is_rc`                                                   |
+| `--tool spiec-easi\|flashweave\|sparcc`                 | `net_tool`                                                |
+| `--prevalence 0.1` / `--present 0`                  | `PREVALENCE_THRESHOLD` / `PRESENT_THRESHOLD`            |
+| `--skip-prevalence-filter TRUE`                       | `Notprefilter`                                            |
+| `--filter-weight TRUE` / `--filter-confidence TRUE` | `is_filter` / `is_edge_con_filter`                      |
+| `--fill-zero-counts TRUE` / `--floor 1e-3`          | `is_rc_fill` / `FilterLow`                              |
+| `--merged TRUE`                                       | `is_merge`                                                |
+| `--eras TRUE`                                         | `ERAS`                                                    |
+| `--network-only TRUE` / `--core-network-only TRUE`  | `build_net_only` / `build_core_net_only`                |
+| `--spiec-easi-ra TRUE`                                | `spieceasi_ra`                                            |
+| `--suffix NAME\|auto`                                  | `outdir_last`                                             |
+| `--cohorts FILE` / `--outdir DIR` / `--only A,B`  | `config_file` / `all_out_dir` / single-cohort debugging |
+| `--hub-top-percent` / `--hub-min-degree`            | hub definition                                              |
 
 Any nested field can be set with `--set`; separate levels with `/`:
 
@@ -195,18 +197,18 @@ names, preserving the legacy behaviour: even with
 
 The legacy and refactored code were compared file by file on synthetic inputs:
 
-| Scenario | Files compared | Result |
-|---|---|---|
-| read count + SPIEC-EASI + 10% prevalence | 36 | match |
-| fixed GML network input + multi-group plots | 40 | match |
-| prevalence filter skipped | 36 | match |
-| relative-abundance input | 40 | match |
-| Control networks only | 6 | match |
-| merged cohorts | 36 | match (legacy branch was broken; see REVIEW) |
-| edge-weight filter | 4 | match |
-| edge-confidence filter | 4 | match |
-| SparCC | 43 | match |
-| FlashWeave | 41 | match |
+| Scenario                                    | Files compared | Result                                       |
+| ------------------------------------------- | -------------- | -------------------------------------------- |
+| read count + SPIEC-EASI + 10% prevalence    | 36             | match                                        |
+| fixed GML network input + multi-group plots | 40             | match                                        |
+| prevalence filter skipped                   | 36             | match                                        |
+| relative-abundance input                    | 40             | match                                        |
+| Control networks only                       | 6              | match                                        |
+| merged cohorts                              | 36             | match (legacy branch was broken; see REVIEW) |
+| edge-weight filter                          | 4              | match                                        |
+| edge-confidence filter                      | 4              | match                                        |
+| SparCC                                      | 43             | match                                        |
+| FlashWeave                                  | 41             | match                                        |
 
 Compared content: vertex/edge attributes of network RDS files, CSV/TSV tables,
 statistical text, and ggplot build data and labels. PNG bytes are not compared
