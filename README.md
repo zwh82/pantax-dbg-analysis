@@ -39,6 +39,8 @@ species across all cohorts.
 - Analysis packages: `igraph`, `dplyr`, `tidyr`, `ggplot2`, `patchwork`,
   `data.table`, `stringr`, `ggsci`, `scales`, `gridExtra`, `clinfun`,
   `RColorBrewer`, and `pheatmap` (optional; heatmaps are skipped when absent).
+- Core-species analysis: the same `igraph`/`dplyr`/`tidyr`/`purrr` stack plus
+  `survival`, and `ragg`/`svglite` for figure export.
 - FlashWeave and SparCC modes require their respective tooling; the default
   SPIEC-EASI mode only needs the R packages above.
 

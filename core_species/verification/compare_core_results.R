@@ -33,8 +33,9 @@ problems <- character()
 skipped <- character()
 
 compare_table <- function(path, rel) {
-  a <- read.delim(path, stringsAsFactors = FALSE, check.names = FALSE)
-  b <- read.delim(file.path(candidate, rel),
+  reader <- if (grepl("\\.csv$", rel)) read.csv else read.delim
+  a <- reader(path, stringsAsFactors = FALSE, check.names = FALSE)
+  b <- reader(file.path(candidate, rel),
     stringsAsFactors = FALSE, check.names = FALSE)
   if (!identical(dim(a), dim(b))) {
     problems <<- c(problems, paste0(rel, ": shape ", paste(dim(a), collapse = "x"),

@@ -1,8 +1,8 @@
-# Pipeline configuration.
-# NOTE: the default config is config/pipeline.yaml.  This file is kept as an
-# R-format example and is only read when passed explicitly:
-#   Rscript run_pipeline.R --config config/pipeline.R
-# The entry point reads this file with --config (default: config/pipeline.yaml).
+# Core-species healthy-network configuration (R format).
+# The default is config/core_network.yaml; this file is kept as an R-format
+# equivalent and is only read when passed explicitly:
+#   Rscript run_pipeline.R --config config/core_network.R
+# Builds one Control-only network per country from config/cohorts_core.tsv.
 # Legacy switch names from scripts/01_config.R are noted in brackets.
 
 config <- list(

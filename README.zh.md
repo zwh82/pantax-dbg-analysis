@@ -30,6 +30,8 @@ hub 物种、稀有/丰富物种以及 ERAS 恢复等。另构建 20 个国家�
 - 下游分析依赖：`igraph`、`dplyr`、`tidyr`、`ggplot2`、`patchwork`、
   `data.table`、`stringr`、`ggsci`、`scales`、`gridExtra`、`clinfun`、
   `RColorBrewer`；`pheatmap` 为可选项（缺失时跳过热图）。
+- 核心物种分析：上述 `igraph`/`dplyr`/`tidyr`/`purrr` 加 `survival`，以及
+  导出图片所需的 `ragg`/`svglite`。
 - FlashWeave 和 SparCC 模式需要各自的外部工具；默认的 SPIEC-EASI 只需上述 R 包。
 
 R 包路径可在 `config/pipeline.yaml` 的 `runtime.library_paths` 和

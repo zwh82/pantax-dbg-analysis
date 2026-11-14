@@ -19,27 +19,30 @@ lists. The graph objects are read, never rewritten.
 
 ## Core Control networks
 
-The Italy core network was rebuilt with
+All 20 countries were rebuilt with
 
 ```bash
-Rscript run_pipeline.R --config config/core_network.yaml --only Italy --outdir /tmp/core_net_test
+Rscript run_pipeline.R --config config/core_network.yaml --outdir /tmp/core_net_all
 ```
 
-and compared with the legacy `all_country_core/Italy/res_rc`:
+and compared with the legacy `all_country_core/` tree:
 
-- identical file list;
-- identical `*.csv` / `*.tsv` contents;
-- identical vertex and edge counts, vertex names, adjacency matrix and
-  absolute edge weights in `g_Control_full_network.rds`.
+- identical file lists (140 files, 7 per country);
+- all `*.csv` / `*.tsv` tables match within `1e-9`;
+- for every country, identical vertex and edge counts, vertex names, adjacency
+  matrix and absolute edge weights in `g_Control_full_network.rds`.
 
-The remaining countries use the same table and code path.
+`Control_centrality_metrics.csv` can differ in the last digits of the
+eigenvector column for the same ARPACK reason noted below. The Italy rebuild
+done during development matched the legacy file exactly.
 
 ## Known nondeterminism
 
 `igraph::eigen_centrality` uses an ARPACK start vector, so the last digits of
-the eigenvector column in the unseeded consensus-hub source data can differ
-between runs. Running the original script twice shows the same variation.
-Analysis tables are produced under a fixed seed and are stable.
+the eigenvector column in the unseeded consensus-hub source data and in
+`Control_centrality_metrics.csv` can differ between runs. Running the original
+script twice shows the same variation. Core-species analysis tables are
+produced under a fixed seed and are stable.
 
 ## Re-running a comparison
 
