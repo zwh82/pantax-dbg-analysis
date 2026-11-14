@@ -212,6 +212,14 @@ Compared content: vertex/edge attributes of network RDS files, CSV/TSV tables,
 statistical text, and ggplot build data and labels. PNG bytes are not compared
 because they depend on the graphics device. See `REVIEW.md` for details.
 
+## Reproduction
+
+The full 2026-11-14 run (73 non-ERAS cohorts + ERAS, then analysis) is recorded
+in [`reproduction/2026-11-14-full-run/`](reproduction/2026-11-14-full-run/).
+Its `reproduce.sh` snapshots the executed code/config into
+`control/executed_files_<UTC>/` before launching the 13 workers and the
+downstream analysis.
+
 ## License
 
 MIT License. See [LICENSE](LICENSE).

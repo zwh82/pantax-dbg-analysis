@@ -199,6 +199,13 @@ Rscript run_pipeline.R --config config/eras.yaml --outdir /path/to/results
 比较内容：网络 RDS 的顶点/边属性、CSV/TSV、统计文本、ggplot 的 build data
 与标签。PNG 因设备差异未做字节比较。详见 `REVIEW.md`。
 
+## 复现
+
+2026-11-14 的完整运行（73 个非 ERAS 队列 + ERAS，再跑全部分析）记录在
+[`reproduction/2026-11-14-full-run/`](reproduction/2026-11-14-full-run/)。
+其中的 `reproduce.sh` 会在启动 13 个 worker 和下游分析之前，把实际执行的
+代码/配置快照保存到 `control/executed_files_<UTC>/`。
+
 ## License
 
 MIT License. See [LICENSE](LICENSE).
