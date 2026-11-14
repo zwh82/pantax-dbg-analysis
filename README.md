@@ -196,3 +196,7 @@ Rscript run_pipeline.R --config config/eras.yaml --outdir /path/to/results
 
 比较内容：网络 RDS 的顶点/边属性、CSV/TSV、统计文本、ggplot 的 build data
 与标签。PNG 因设备差异未做字节比较。详见 `REVIEW.md`。
+
+## License
+
+MIT License. See [LICENSE](LICENSE).
