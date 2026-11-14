@@ -108,10 +108,12 @@ Rscript analysis/run_analysis.R \
 构建核心物种健康网络并分析核心物种作用：
 
 ```bash
+# 20 个国家核心物种 Control 网络 -> results/all_country_core/
 Rscript run_pipeline.R \
   --config config/core_network.yaml \
   --outdir results
 
+# 对 results/network 中的 74 个队列网络做作用分析
 Rscript core_species/run_core_species.R \
   --base-dir results/network \
   --step all

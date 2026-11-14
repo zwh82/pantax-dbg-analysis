@@ -119,10 +119,12 @@ Rscript analysis/run_analysis.R \
 Build the core-species Control networks and analyse core-species roles:
 
 ```bash
+# 20 Control-only core-species networks -> results/all_country_core/
 Rscript run_pipeline.R \
   --config config/core_network.yaml \
   --outdir results
 
+# role analysis over the 74-cohort networks in results/network
 Rscript core_species/run_core_species.R \
   --base-dir results/network \
   --step all
