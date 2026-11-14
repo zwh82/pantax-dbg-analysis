@@ -1,5 +1,7 @@
 # pantax-dbg-analysis
 
+**语言 / Language:** [中文](README.md) | [English](README.en.md)
+
 基于 `pantax-dbg` 产出的 profiling 数据，进行 74 个队列的肠道菌群共现网络
 构建、下游分析与图件，以及 ERAS 时间点的网络恢复分析。代码重构自
 `high_rare_net4`，原目录 `/home/work/wenhai/meta/high_rare_net4` 未做任何修改。
