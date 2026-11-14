@@ -210,6 +210,12 @@ results/
 The suffix (`res_rc` by default) is derived from the input/filter/tool
 combination, or set explicitly with `--suffix`.
 
+**Rerun note:** network construction reuses an existing
+`g_<group>_full_network.rds` in the output directory instead of refitting it.
+When input matrices or sample metadata change, write to a fresh output
+directory (or delete the old `res_rc` first); otherwise prevalence tables and
+plots are regenerated around stale networks.
+
 ## Downstream analysis
 
 `analysis/run_analysis.R` runs one or more steps:
